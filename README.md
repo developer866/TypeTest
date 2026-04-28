@@ -2,7 +2,7 @@
 
 A real-time typing speed test built with Next.js, Firebase Auth, Firestore, and Firebase Realtime Database. Players can test their WPM and accuracy across multiple difficulty levels — with or without an account. Signed-in users have their personal best saved to a live leaderboard.
 
-🔗 **Live:** [your-deployed-url.vercel.app](https://your-deployed-url.vercel.app)
+🔗 **Live:** [your-deployed-url.vercel.app](https://typing-test-blond-mu.vercel.app/)
 
 ---
 
