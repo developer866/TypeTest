@@ -6,17 +6,17 @@ import { getRandom, renderText } from "./utils/utils"
 
 export default function TypingTest() {
   const [difficulty, setDifficulty] = useState("medium")
-  const [mode, setMode]             = useState("timed")
-  const [duration, setDuration]     = useState(60)
-  const [text, setText]             = useState("")
-  const [typed, setTyped]           = useState("")
-  const [timeLeft, setTimeLeft]     = useState(60)
-  const [started, setStarted]       = useState(false)
-  const [finished, setFinished]     = useState(false)
-  const [bestWPM, setBestWPM]       = useState(0)
-
+  const [mode, setMode] = useState("timed")
+  const [duration, setDuration] = useState(60)
+  const [text, setText] = useState("")
+  const [typed, setTyped] = useState("")
+  const [timeLeft, setTimeLeft] = useState(60)
+  const [started, setStarted] = useState(false)
+  const [finished, setFinished] = useState(false)
+  const [bestWPM, setBestWPM] = useState(0)
+  const textRef = useRef(null)
   const intervalRef = useRef(null)
-  const inputRef    = useRef(null)
+  const inputRef = useRef(null)
 
   // ── Init ──────────────────────────────────────────────────────────────────
   const init = useCallback((diff = difficulty, mod = mode, dur = duration) => {
@@ -62,11 +62,11 @@ export default function TypingTest() {
   }, [finished])
 
   // ── Stats ─────────────────────────────────────────────────────────────────
-  const elapsed      = duration - timeLeft || 1
+  const elapsed = duration - timeLeft || 1
   const correctChars = typed.split("").filter((c, i) => c === text[i]).length
-  const minutes      = elapsed / 60
-  const wpm          = started || finished ? Math.round((correctChars / 5) / minutes) : 0
-  const accuracy     = typed.length > 0 ? Math.round((correctChars / typed.length) * 100) : 100
+  const minutes = elapsed / 60
+  const wpm = started || finished ? Math.round((correctChars / 5) / minutes) : 0
+  const accuracy = typed.length > 0 ? Math.round((correctChars / typed.length) * 100) : 100
 
   // ── Input handler ─────────────────────────────────────────────────────────
   const handleChange = (e) => {
@@ -75,6 +75,13 @@ export default function TypingTest() {
     if (val.length > text.length) return
     if (!started) setStarted(true)
     setTyped(val)
+    // mobile auto scroll
+    setTimeout(() => {
+      textRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      })
+    }, 0)
   }
 
   // ── Controls ──────────────────────────────────────────────────────────────
@@ -104,7 +111,10 @@ export default function TypingTest() {
       />
     )
   }
-
+  // handle typing 
+  const handleTyping = (e) => {
+    textRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+  }
   // ── Main UI ───────────────────────────────────────────────────────────────
   return (
     <div
@@ -181,6 +191,7 @@ export default function TypingTest() {
             className="text-2xl sm:text-[1.6rem] leading-[1.9] tracking-wide select-none cursor-default"
             style={{ fontFamily: "'JetBrains Mono', 'Fira Code', monospace" }}
             onClick={focusInput}
+            onFocus={handleTyping}
             onTouchStart={focusInput}
           >
             {renderText(text, typed)}
@@ -213,6 +224,7 @@ export default function TypingTest() {
 
         </div>
       </div>
+
     </div>
   )
 }
