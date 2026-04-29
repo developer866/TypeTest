@@ -2,21 +2,23 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Result from './components/Result'
 import Stats from './components/Stats'
+import TypingInput from './components/TypingInput'
 import { getRandom, renderText } from "./utils/utils"
 
 export default function TypingTest() {
   const [difficulty, setDifficulty] = useState("medium")
-  const [mode, setMode] = useState("timed")
-  const [duration, setDuration] = useState(60)
-  const [text, setText] = useState("")
-  const [typed, setTyped] = useState("")
-  const [timeLeft, setTimeLeft] = useState(60)
-  const [started, setStarted] = useState(false)
-  const [finished, setFinished] = useState(false)
-  const [bestWPM, setBestWPM] = useState(0)
-  const textRef = useRef(null)
+  const [mode, setMode]             = useState("timed")
+  const [duration, setDuration]     = useState(60)
+  const [text, setText]             = useState("")
+  const [typed, setTyped]           = useState("")
+  const [timeLeft, setTimeLeft]     = useState(60)
+  const [started, setStarted]       = useState(false)
+  const [finished, setFinished]     = useState(false)
+  const [bestWPM, setBestWPM]       = useState(0)
+
   const intervalRef = useRef(null)
-  const inputRef = useRef(null)
+  const passageRef  = useRef(null)
+  const inputRef    = useRef(null)
 
   // ── Init ──────────────────────────────────────────────────────────────────
   const init = useCallback((diff = difficulty, mod = mode, dur = duration) => {
@@ -26,7 +28,9 @@ export default function TypingTest() {
     setTimeLeft(dur)
     setStarted(false)
     setFinished(false)
-    setTimeout(() => inputRef.current?.focus(), 50)
+    // Scroll back to top then focus
+    window.scrollTo({ top: 0, behavior: "smooth" })
+    setTimeout(() => inputRef.current?.focus(), 100)
   }, [difficulty, mode, duration])
 
   useEffect(() => { init() }, [])
@@ -62,11 +66,11 @@ export default function TypingTest() {
   }, [finished])
 
   // ── Stats ─────────────────────────────────────────────────────────────────
-  const elapsed = duration - timeLeft || 1
+  const elapsed      = duration - timeLeft || 1
   const correctChars = typed.split("").filter((c, i) => c === text[i]).length
-  const minutes = elapsed / 60
-  const wpm = started || finished ? Math.round((correctChars / 5) / minutes) : 0
-  const accuracy = typed.length > 0 ? Math.round((correctChars / typed.length) * 100) : 100
+  const minutes      = elapsed / 60
+  const wpm          = started || finished ? Math.round((correctChars / 5) / minutes) : 0
+  const accuracy     = typed.length > 0 ? Math.round((correctChars / typed.length) * 100) : 100
 
   // ── Input handler ─────────────────────────────────────────────────────────
   const handleChange = (e) => {
@@ -75,26 +79,21 @@ export default function TypingTest() {
     if (val.length > text.length) return
     if (!started) setStarted(true)
     setTyped(val)
-    // mobile auto scroll
-    setTimeout(() => {
-      textRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      })
-    }, 0)
+  }
+
+  // ── Focus helper — only on passage tap, not whole page ───────────────────
+  const focusInput = (e) => {
+    e.stopPropagation()
+    inputRef.current?.focus()
   }
 
   // ── Controls ──────────────────────────────────────────────────────────────
   const handleDifficulty = (d) => { setDifficulty(d); init(d, mode, duration) }
   const handleMode = (m) => {
     const dur = m === "timed" ? 60 : m === "timed30" ? 30 : 60
-    setMode(m)
-    setDuration(dur)
-    init(difficulty, m, dur)
+    setMode(m); setDuration(dur); init(difficulty, m, dur)
   }
   const restart = () => init()
-
-  const focusInput = () => inputRef.current?.focus()
 
   // ── Results screen ────────────────────────────────────────────────────────
   if (finished) {
@@ -111,19 +110,19 @@ export default function TypingTest() {
       />
     )
   }
-  // handle typing 
-  const handleTyping = (e) => {
-    textRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
-  }
+
   // ── Main UI ───────────────────────────────────────────────────────────────
   return (
-    <div
-      className="min-h-screen bg-[#111111] text-white flex flex-col"
-      onClick={focusInput}
-      onTouchStart={focusInput}
-    >
+    <div className="min-h-screen bg-[#111111] text-white flex flex-col">
 
-      {/* ── Stats + controls bar ── */}
+      <TypingInput
+        ref={inputRef}
+        typed={typed}
+        onChange={handleChange}
+        onRestart={restart}
+        passageRef={passageRef}
+      />
+
       <Stats
         wpm={wpm}
         accuracy={accuracy}
@@ -135,51 +134,29 @@ export default function TypingTest() {
         onMode={handleMode}
       />
 
-      {/* ── Typing area ── */}
-      <div className="flex-1 px-4 sm:px-8 py-8 sm:py-12">
+      {/* pb-96 gives enough space below text so it's never hidden by keyboard */}
+      <div className="flex-1 px-4 sm:px-8 py-8 pb-96 sm:py-12 sm:pb-12">
         <div className="max-w-5xl mx-auto">
 
-          {/* Hint */}
           {!started && (
             <p className="text-zinc-700 text-xs font-mono tracking-widest uppercase text-center mb-6">
-              Tap anywhere and start typing
+              Tap the text and start typing
             </p>
           )}
 
-          {/* ── Hidden input — mobile fixed ── */}
-          <input
-            ref={inputRef}
-            value={typed}
-            onChange={handleChange}
-            autoFocus
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="none"
-            spellCheck="false"
-            data-gramm="false"
-            onKeyDown={(e) => {
-              if (e.key === "Tab") { e.preventDefault(); restart() }
-            }}
-            // w-px h-px instead of w-0 h-0 — mobile browsers need 1px to open keyboard
-            className="opacity-0 absolute top-0 left-0 w-px h-px"
-            aria-label="Type here"
-          />
-
-          {/* ── Passage display ── */}
+          {/* Passage — tap/click to focus input */}
           <div
-            className="text-2xl sm:text-[1.6rem] leading-[1.9] tracking-wide select-none cursor-default"
-            style={{ fontFamily: "'JetBrains Mono', 'Fira Code', monospace" }}
+            ref={passageRef}
             onClick={focusInput}
-            onFocus={handleTyping}
             onTouchStart={focusInput}
+            className="text-2xl sm:text-[1.6rem] leading-[1.9] tracking-wide select-none cursor-text"
+            style={{ fontFamily: "'JetBrains Mono', 'Fira Code', monospace" }}
           >
             {renderText(text, typed)}
           </div>
 
-          {/* Divider */}
           <div className="mt-10 sm:mt-12 border-t border-zinc-800/60" />
 
-          {/* Restart button */}
           <div className="mt-6 sm:mt-8 flex justify-center">
             <button
               onClick={restart}
@@ -194,16 +171,11 @@ export default function TypingTest() {
           </div>
 
           <p className="text-center text-zinc-700 text-xs font-mono mt-3">
-            Press{" "}
-            <kbd className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-500 text-[10px]">
-              Tab
-            </kbd>{" "}
-            to restart
+            Press <kbd className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-500 text-[10px]">Tab</kbd> to restart
           </p>
 
         </div>
       </div>
-
     </div>
   )
 }

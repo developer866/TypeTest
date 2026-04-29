@@ -1,12 +1,10 @@
 "use client"
 import { useEffect, useRef, forwardRef } from "react"
 
-// forwardRef — lets page.jsx pass inputRef so init() can call .focus() after restart
 const TypingInput = forwardRef(function TypingInput(
   { typed, onChange, onRestart, passageRef },
   ref
 ) {
-  // If no ref passed from parent, use internal one
   const internalRef = useRef(null)
   const inputRef    = ref || internalRef
 
@@ -15,16 +13,32 @@ const TypingInput = forwardRef(function TypingInput(
     setTimeout(() => inputRef.current?.focus(), 100)
   }, [])
 
-  // Auto-scroll cursor into view every time typed changes
+  // ── Scroll cursor into view accounting for iOS keyboard ──────────────────
   useEffect(() => {
     if (!passageRef?.current) return
+
     const cursor = passageRef.current.querySelector(".typing-cursor")
     if (!cursor) return
-    cursor.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-      inline: "nearest",
-    })
+
+    // Get cursor position relative to viewport
+    const cursorRect  = cursor.getBoundingClientRect()
+    const viewportH   = window.innerHeight
+
+    // On mobile, keyboard takes ~40% of screen height
+    // We treat anything below 55% of viewport as "covered by keyboard"
+    const safeBottom  = viewportH * 0.55
+
+    if (cursorRect.top > safeBottom || cursorRect.bottom > safeBottom) {
+      // Scroll so cursor sits at 35% from top — well above keyboard
+      const targetY = window.scrollY + cursorRect.top - viewportH * 0.35
+      window.scrollTo({ top: targetY, behavior: "smooth" })
+    }
+
+    // Also handle if cursor has scrolled above viewport
+    if (cursorRect.top < 80) {
+      const targetY = window.scrollY + cursorRect.top - 100
+      window.scrollTo({ top: targetY, behavior: "smooth" })
+    }
   }, [typed])
 
   return (
