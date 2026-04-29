@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Result from './components/Result'
 import Stats from './components/Stats'
-import TypingInput from './components/TypingInput'
+import TypingInput from './components/Typinginput'
 import { getRandom, renderText } from "./utils/utils"
 
 export default function TypingTest() {
