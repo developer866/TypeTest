@@ -1,5 +1,5 @@
 // utils/scores.js
-import { db, rtdb } from "../src/app/lib/Firebase"
+import { db, rtdb } from "../lib/Firebase"
 import { collection, addDoc, serverTimestamp } from "firebase/firestore"
 import { ref, set, get, orderByChild, query, limitToLast } from "firebase/database"
 
@@ -15,7 +15,7 @@ export const saveScore = async (user, { wpm, accuracy, difficulty, mode, duratio
       email:      user.email,
       wpm,
       accuracy,
-      difficulty:difficulty  || "medium",
+      difficulty:difficulty,
       mode,
       duration,
       createdAt:  serverTimestamp(),
@@ -49,7 +49,7 @@ export const updateLeaderboard = async (user, wpm, accuracy, difficulty) => {
         name:       user.displayName || "Anonymous",
         wpm,
         accuracy,
-        difficulty: difficulty || "medium",
+        difficulty: difficulty,
         updatedAt:  Date.now(),
       }
 

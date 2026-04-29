@@ -1,4 +1,6 @@
-export const passages = {
+// utils/utils.js
+
+const passages = {            // ← defined INSIDE utils.js
   easy: [
     "the quick brown fox jumps over the lazy dog near the river bank where the cool water flows gently between the smooth rocks and tall green trees line the path ahead",
     "practice makes perfect and every great developer started by writing small programs and fixing tiny bugs one line at a time until the skills became second nature",
@@ -16,33 +18,45 @@ export const passages = {
   ],
 }
 
-// passages now lives here — import it wherever you need it
+// ← NO passages parameter — it reads from the const above
 export const getRandom = (diff) => {
-  const pool = passages[diff]
+  const pool = passages[diff] ?? passages.medium
   return pool[Math.floor(Math.random() * pool.length)]
 }
 
-// typed is passed as a parameter — NOT read from thin air
-export const renderText = (text, typed) => {
-  return text.split("").map((char, i) => {
-    let cls = "text-zinc-600"
-
-    if (i < typed.length) {
-      cls = typed[i] === char
-        ? "text-green-400"
-        : char === " "
-          ? "bg-red-500/40 text-red-400"
-          : "text-red-400 underline decoration-red-400 underline-offset-4"
-    } else if (i === typed.length) {
-      cls = "text-zinc-200 border-b-2 border-zinc-300"
-    }
-
-    return <span key={i} className={cls}>{char}</span>
-  })
-}
-
 export const formatTime = (s) => {
-  const m = Math.floor(s / 60)
+  const m   = Math.floor(s / 60)
   const sec = s % 60
   return `${m}:${String(sec).padStart(2, "0")}`
+}
+
+export const renderText = (text, typed) => {
+  if (!text) return null
+
+  const safeTyped = typed ?? ""
+  const typedLen  = safeTyped.length
+
+  return text.split("").map((char, i) => {
+    let cls
+
+    if (i < typedLen) {
+      if (safeTyped[i] === char) {
+        cls = "text-green-400"
+      } else if (char === " ") {
+        cls = "bg-red-500/30 text-red-400 rounded-sm"
+      } else {
+        cls = "text-red-400 underline decoration-red-400 underline-offset-4"
+      }
+    } else if (i === typedLen) {
+      cls = "text-white border-b-2 border-white"
+    } else {
+      cls = "text-zinc-600"
+    }
+
+    return (
+      <span key={i} className={cls}>
+        {char}
+      </span>
+    )
+  })
 }

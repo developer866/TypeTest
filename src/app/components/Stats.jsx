@@ -1,4 +1,4 @@
-import { formatTime } from "../../../utils/utils"
+import { formatTime } from "../utils/utils"
 
 export default function Stats({
   wpm, accuracy, timeLeft, mode, duration,

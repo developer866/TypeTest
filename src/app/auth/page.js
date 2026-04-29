@@ -1,4 +1,4 @@
-import { Auths } from "../../../utils/auth";
+import { Auths } from "../utils/auth";
 export default function Home() {
   return (
     <div>

@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { signOut, signInWithPopup } from 'firebase/auth'
-import { useAuth } from '../../../utils/auth'
+import { useAuth } from '../utils/auth'
 import { Auth, Provider } from '../lib/Firebase'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -11,7 +11,7 @@ function Navbar() {
   const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
   const user = useAuth()
-  const isLoading = user === undefined  // still checking auth state
+  const isLoading = user === undefined  // undefined = Firebase still resolving
 
   const handleSignIn = async () => {
     try {
@@ -60,12 +60,17 @@ function Navbar() {
         {/* ── Auth section ── */}
         <div className="flex items-center gap-3">
 
-          {/* Loading state */}
+          {/* ── Loading skeleton — same shape as signed-in button ── */}
+          {/* This prevents the guest → signed-in flicker on refresh   */}
           {isLoading && (
-            <div className="w-8 h-8 rounded-full bg-zinc-800 animate-pulse" />
+            <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-zinc-800">
+              <div className="w-7 h-7 rounded-full bg-zinc-800 animate-pulse" />
+              <div className="w-20 h-3 rounded-md bg-zinc-800 animate-pulse hidden sm:block" />
+              <div className="w-3 h-3 rounded bg-zinc-800 animate-pulse" />
+            </div>
           )}
 
-          {/* Guest — not signed in */}
+          {/* ── Guest — confirmed not signed in ── */}
           {!isLoading && !user && (
             <div className="flex items-center gap-3">
               <span className="text-zinc-600 text-xs font-mono hidden sm:block">
@@ -75,7 +80,6 @@ function Navbar() {
                 onClick={handleSignIn}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-zinc-100 text-zinc-950 text-sm font-semibold transition-all duration-200"
               >
-                {/* Google icon */}
                 <svg width="15" height="15" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                   <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -85,29 +89,28 @@ function Navbar() {
                 Sign in with Google
               </button>
               <button
-                onClick={()=> router.push('/auth')}
+                onClick={() => router.push('/auth')}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-zinc-100 text-zinc-950 text-sm font-semibold transition-all duration-200"
               >
-
                 Sign in with email
               </button>
-            
             </div>
           )}
 
-          {/* Logged in — show profile pic + dropdown */}
+          {/* ── Logged in — profile pic + dropdown ── */}
           {!isLoading && user && (
             <div className="relative">
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-zinc-800 hover:border-zinc-600 transition-all duration-200 group"
               >
-                {/* Google profile pic */}
                 {user.photoURL ? (
                   <Image
                     src={user.photoURL}
-                    alt={user.displayName}
-                    className="w-7 h-7 rounded-full object-cover ring-1 ring-zinc-700"
+                    alt={user.displayName || "User"}
+                    width={28}
+                    height={28}
+                    className="rounded-full object-cover ring-1 ring-zinc-700"
                     referrerPolicy="no-referrer"
                   />
                 ) : (
@@ -118,7 +121,6 @@ function Navbar() {
                 <span className="text-zinc-300 text-sm font-medium hidden sm:block max-w-30 truncate">
                   {user.displayName || user.email}
                 </span>
-                {/* Chevron */}
                 <svg
                   width="12" height="12" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" strokeWidth="2" strokeLinecap="round"
@@ -128,17 +130,12 @@ function Navbar() {
                 </svg>
               </button>
 
-              {/* Dropdown menu */}
+              {/* Dropdown */}
               {menuOpen && (
                 <>
-                  {/* Click outside to close */}
-                  <div
-                    className="fixed inset-0 z-10"
-                    onClick={() => setMenuOpen(false)}
-                  />
+                  <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
                   <div className="absolute right-0 top-full mt-2 w-52 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-20 overflow-hidden">
 
-                    {/* User info */}
                     <div className="px-4 py-3 border-b border-zinc-800">
                       <p className="text-white text-sm font-semibold truncate">
                         {user.displayName || "User"}
@@ -148,7 +145,6 @@ function Navbar() {
                       </p>
                     </div>
 
-                    {/* Menu items */}
                     <div className="py-1">
                       <Link
                         href="/leaderboard"
@@ -166,7 +162,6 @@ function Navbar() {
                       </Link>
                     </div>
 
-                    {/* Sign out */}
                     <div className="border-t border-zinc-800 py-1">
                       <button
                         onClick={handleSignOut}

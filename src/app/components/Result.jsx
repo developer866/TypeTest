@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from 'react'
 import { signInWithPopup } from 'firebase/auth'
 import { Auth, Provider } from '../lib/Firebase'
-import { useAuth } from '../../../utils/auth'
-import { saveScore } from '../../../utils/score'
+import { useAuth } from '../utils/auth'
+import { saveScore } from '../utils/score'
 import Link from 'next/link'
 
 function Result({ wpm, accuracy, difficulty, mode, duration, restart }) {

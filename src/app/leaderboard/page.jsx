@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { ref, onValue, query, orderByChild, limitToLast } from 'firebase/database'
 import { rtdb } from '../lib/Firebase'
-import { useAuth } from '../../../utils/auth'
+import { useAuth } from '../utils/auth'
 import Link from 'next/link'
 
 export default function Leaderboard() {

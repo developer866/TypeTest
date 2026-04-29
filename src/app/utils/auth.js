@@ -1,5 +1,5 @@
 "use client";
-import { Auth } from "../src/app/lib/Firebase";
+import { Auth } from "../lib/Firebase";
 import { useRouter } from "next/navigation";
 import {
   createUserWithEmailAndPassword,
@@ -32,7 +32,7 @@ export const Auths = () => {
       // optional: clear inputs
       setEmail("");
       setPassword("");
-      router.push("/practise");
+      router.push("/");
     } catch (err) {
       console.log("Error:", err.message);
     }
@@ -62,13 +62,40 @@ export const Auths = () => {
   );
 };
 
-export const useAuth = () => {
-  const [user, setUser] = useState(null);
+// export const useAuth = () => {
+//   const [user, setUser] = useState(null);
+//   useEffect(() => {
+//     const unsubscribe = onAuthStateChanged(Auth, (currentUser) => {
+//       setUser(currentUser);
+//     });
+//     return () => unsubscribe();
+//   }, []);
+//   return user;
+// };
+// utils/auth.js
+
+
+export function useAuth() {
+  // Check localStorage first — if Firebase previously saved a user,
+  // we know someone is logged in before the async check completes
+  const [user, setUser] = useState(undefined)
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(Auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return () => unsubscribe();
-  }, []);
-  return user;
-};
+    // Firebase stores auth state under this key in localStorage
+    const stored = localStorage.getItem("firebase:authUser:" + process.env.NEXT_PUBLIC_FIREBASE_API_KEY + ":[DEFAULT]")
+
+    // If a stored session exists, stay in loading (undefined) state
+    // If nothing stored, we KNOW no user → set null immediately
+    if (!stored) {
+      setUser(null)
+    }
+
+    // Either way, let Firebase confirm the real state
+    const unsub = onAuthStateChanged(Auth, (u) => {
+      setUser(u || null)
+    })
+    return () => unsub()
+  }, [])
+
+  return user
+}
