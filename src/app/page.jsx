@@ -123,21 +123,6 @@ export default function TypingTest() {
       onTouchStart={focusInput}
     >
 
-      {/* ── Top bar ── */}
-      <div className="border-b border-zinc-800/60 px-8 py-4">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-
-          {/* Personal best */}
-          {bestWPM > 0 && (
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-yellow-400">🏆</span>
-              <span className="text-zinc-400 hidden sm:inline">Personal best:</span>
-              <span className="text-white font-bold">{bestWPM} WPM</span>
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* ── Stats + controls bar ── */}
       <Stats
         wpm={wpm}

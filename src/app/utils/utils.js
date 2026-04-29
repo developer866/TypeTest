@@ -1,6 +1,6 @@
 // utils/utils.js
 
-const passages = {            // ← defined INSIDE utils.js
+const passages = {
   easy: [
     "the quick brown fox jumps over the lazy dog near the river bank where the cool water flows gently between the smooth rocks and tall green trees line the path ahead",
     "practice makes perfect and every great developer started by writing small programs and fixing tiny bugs one line at a time until the skills became second nature",
@@ -18,7 +18,6 @@ const passages = {            // ← defined INSIDE utils.js
   ],
 }
 
-// ← NO passages parameter — it reads from the const above
 export const getRandom = (diff) => {
   const pool = passages[diff] ?? passages.medium
   return pool[Math.floor(Math.random() * pool.length)]
@@ -48,7 +47,8 @@ export const renderText = (text, typed) => {
         cls = "text-red-400 underline decoration-red-400 underline-offset-4"
       }
     } else if (i === typedLen) {
-      cls = "text-white border-b-2 border-white"
+      // typing-cursor — TypingInput scrolls this into view
+      cls = "typing-cursor text-white border-b-2 border-white"
     } else {
       cls = "text-zinc-600"
     }
