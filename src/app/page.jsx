@@ -127,12 +127,6 @@ export default function TypingTest() {
       <div className="border-b border-zinc-800/60 px-8 py-4">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
 
-          {/* Logo placeholder — your Navbar component sits above this in layout */}
-          <div className="flex items-center gap-2">
-            <span className="text-base">⌨️</span>
-            <span className="text-white font-bold text-sm hidden sm:block">Typing Speed Test</span>
-          </div>
-
           {/* Personal best */}
           {bestWPM > 0 && (
             <div className="flex items-center gap-2 text-sm">
