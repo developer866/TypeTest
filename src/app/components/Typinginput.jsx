@@ -6,39 +6,35 @@ const TypingInput = forwardRef(function TypingInput(
   ref
 ) {
   const internalRef = useRef(null)
-  const inputRef    = ref || internalRef
+  const inputRef = ref || internalRef
+  const lastTypedRef = useRef("")
 
   // Focus on mount
   useEffect(() => {
-    setTimeout(() => inputRef.current?.focus(), 100)
+    const t = setTimeout(() => inputRef.current?.focus(), 150)
+    return () => clearTimeout(t)
   }, [])
 
-  // ── Scroll cursor into view accounting for iOS keyboard ──────────────────
-  useEffect(() => {
+  // Scroll cursor into view (container-based)
+  const scrollCursorIntoView = () => {
     if (!passageRef?.current) return
 
     const cursor = passageRef.current.querySelector(".typing-cursor")
     if (!cursor) return
 
-    // Get cursor position relative to viewport
-    const cursorRect  = cursor.getBoundingClientRect()
-    const viewportH   = window.innerHeight
+    cursor.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    })
+  }
 
-    // On mobile, keyboard takes ~40% of screen height
-    // We treat anything below 55% of viewport as "covered by keyboard"
-    const safeBottom  = viewportH * 0.55
+  // Scroll when typing
+  useEffect(() => {
+    if (typed === lastTypedRef.current) return
+    lastTypedRef.current = typed
 
-    if (cursorRect.top > safeBottom || cursorRect.bottom > safeBottom) {
-      // Scroll so cursor sits at 35% from top — well above keyboard
-      const targetY = window.scrollY + cursorRect.top - viewportH * 0.35
-      window.scrollTo({ top: targetY, behavior: "smooth" })
-    }
-
-    // Also handle if cursor has scrolled above viewport
-    if (cursorRect.top < 80) {
-      const targetY = window.scrollY + cursorRect.top - 100
-      window.scrollTo({ top: targetY, behavior: "smooth" })
-    }
+    const t = setTimeout(scrollCursorIntoView, 40)
+    return () => clearTimeout(t)
   }, [typed])
 
   return (
@@ -51,12 +47,14 @@ const TypingInput = forwardRef(function TypingInput(
       autoCorrect="off"
       autoCapitalize="none"
       spellCheck="false"
-      data-gramm="false"
+      inputMode="text"
       onKeyDown={(e) => {
-        if (e.key === "Tab") { e.preventDefault(); onRestart() }
+        if (e.key === "Tab") {
+          e.preventDefault()
+          onRestart()
+        }
       }}
-      className="opacity-0 absolute top-0 left-0 w-px h-px"
-      aria-label="Type here"
+      className="opacity-0 absolute top-0 left-0 w-px h-px pointer-events-none"
     />
   )
 })

@@ -46,7 +46,7 @@ export const updateLeaderboard = async (user, wpm, accuracy, difficulty) => {
       // ✅ Build the object first, only include photoURL if it exists
       const entry = {
         uid:        user.uid,
-        name:       user.displayName || "Anonymous",
+        name:       user.displayName ,
         wpm,
         accuracy,
         difficulty: difficulty,
