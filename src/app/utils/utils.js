@@ -1,5 +1,6 @@
-// utils/utils.js
 
+
+// ─── Passages ─────────────────────────────────────────────────────────────────
 const passages = {
   easy: [
     "the quick brown fox jumps over the lazy dog near the river bank where the cool water flows gently between the smooth rocks and tall green trees line the path ahead",
@@ -24,39 +25,6 @@ export const getRandom = (diff) => {
 }
 
 export const formatTime = (s) => {
-  const m   = Math.floor(s / 60)
-  const sec = s % 60
-  return `${m}:${String(sec).padStart(2, "0")}`
-}
-
-export const renderText = (text, typed) => {
-  if (!text) return null
-
-  const safeTyped = typed ?? ""
-  const typedLen  = safeTyped.length
-
-  return text.split("").map((char, i) => {
-    let cls
-
-    if (i < typedLen) {
-      if (safeTyped[i] === char) {
-        cls = "text-green-400"
-      } else if (char === " ") {
-        cls = "bg-red-500/30 text-red-400 rounded-sm"
-      } else {
-        cls = "text-red-400 underline decoration-red-400 underline-offset-4"
-      }
-    } else if (i === typedLen) {
-      // typing-cursor — TypingInput scrolls this into view
-      cls = "typing-cursor text-white border-b-2 border-white"
-    } else {
-      cls = "text-zinc-600"
-    }
-
-    return (
-      <span key={i} className={cls}>
-        {char}
-      </span>
-    )
-  })
+  const m = Math.floor(s / 60)
+  return `${m}:${String(s % 60).padStart(2, "0")}`
 }
